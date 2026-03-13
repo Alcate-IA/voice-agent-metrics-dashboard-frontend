@@ -4,6 +4,7 @@ import { useMetrics } from '../hooks/useMetrics'
 import Header from './Header'
 import ErrorBanner from './ErrorBanner'
 import ConnectionStatus from './ConnectionStatus'
+import MetricsGrid from './MetricsGrid'
 import styles from '../styles/Dashboard.module.css'
 
 /**
@@ -49,6 +50,7 @@ function Dashboard() {
   }
 
   const {
+    currentMetrics,
     isLoading,
     error,
     lastUpdate,
@@ -74,8 +76,7 @@ function Dashboard() {
         consecutiveFailures={consecutiveFailures}
       />
 
-      {/* Placeholder: MetricsGrid */}
-      <div className={styles.metricsGrid} aria-label="Metrics grid placeholder" />
+      <MetricsGrid metrics={currentMetrics} />
 
       {/* Placeholder: ChartsSection */}
       <div className={styles.chartsSection} aria-label="Charts section placeholder" />
