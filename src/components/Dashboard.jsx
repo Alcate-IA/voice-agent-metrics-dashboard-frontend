@@ -7,6 +7,7 @@ import ConnectionStatus from './ConnectionStatus'
 import MetricsGrid from './MetricsGrid'
 import ChartsSection from './ChartsSection'
 import CallsTable from './CallsTable'
+import Filters from './Filters'
 import styles from '../styles/Dashboard.module.css'
 
 /**
@@ -22,6 +23,8 @@ function Dashboard() {
   const [selectedAgentId, setSelectedAgentId] = useState(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [currentSort, setCurrentSort] = useState('timestamp')
+  const [days, setDays] = useState(30)
+  const [statusFilter, setStatusFilter] = useState('all')
 
   // Load customer list once on mount
   useEffect(() => {
@@ -66,8 +69,18 @@ function Dashboard() {
 
   // Fetch historical data on mount and whenever customer/agent selection changes
   useEffect(() => {
-    fetchHistory()
+    fetchHistory({ days })
   }, [fetchHistory])
+
+  const handleDaysChange = (newDays) => {
+    setDays(newDays)
+    setCurrentPage(0)
+    fetchHistory({ days: newDays, page: 0, sortBy: currentSort })
+  }
+
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus)
+  }
 
   return (
     <div className={styles.dashboard} id="dashboard">
@@ -85,6 +98,13 @@ function Dashboard() {
         error={error}
         connectionLost={connectionLost}
         consecutiveFailures={consecutiveFailures}
+      />
+
+      <Filters
+        days={days}
+        onDaysChange={handleDaysChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={handleStatusFilterChange}
       />
 
       <MetricsGrid metrics={currentMetrics} />
