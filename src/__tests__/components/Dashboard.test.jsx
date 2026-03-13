@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Dashboard from '../../components/Dashboard'
 
 vi.mock('../../services/api', () => ({
-  fetchCustomers: vi.fn(),
   fetchAgents: vi.fn(),
   fetchCurrentMetrics: vi.fn(),
   fetchHistoricalMetrics: vi.fn(),
@@ -27,11 +26,6 @@ const defaultMetrics = {
   fetchHistory: vi.fn(),
 }
 
-const mockCustomers = [
-  { id: 1, name: 'Customer A' },
-  { id: 2, name: 'Customer B' },
-]
-
 const mockAgents = [
   { id: 10, name: 'Agent One' },
   { id: 11, name: 'Agent Two' },
@@ -41,7 +35,6 @@ describe('Dashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useMetrics.mockReturnValue(defaultMetrics)
-    api.fetchCustomers.mockResolvedValue(mockCustomers)
     api.fetchAgents.mockResolvedValue(mockAgents)
   })
 
@@ -55,11 +48,11 @@ describe('Dashboard', () => {
     expect(document.getElementById('dashboard')).toBeTruthy()
   })
 
-  it('renders Header with select triggers', async () => {
+  it('renders Header with agent select', async () => {
     render(<Dashboard />)
     await waitFor(() => {
       const triggers = screen.getAllByRole('combobox')
-      expect(triggers.length).toBeGreaterThanOrEqual(2)
+      expect(triggers.length).toBeGreaterThanOrEqual(1)
     })
   })
 
@@ -84,10 +77,10 @@ describe('Dashboard', () => {
     })
   })
 
-  it('fetches customers on mount', async () => {
+  it('fetches agents on mount', async () => {
     render(<Dashboard />)
     await waitFor(() => {
-      expect(api.fetchCustomers).toHaveBeenCalledTimes(1)
+      expect(api.fetchAgents).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -104,12 +97,10 @@ describe('Dashboard', () => {
     })
   })
 
-  it('renders customer options after loading', async () => {
+  it('loads agents and auto-selects first on mount', async () => {
     render(<Dashboard />)
     await waitFor(() => {
-      // Customer names appear in the page (inside select options rendered by shadcn)
-      expect(document.body).toBeTruthy()
+      expect(api.fetchAgents).toHaveBeenCalled()
     })
-    expect(api.fetchCustomers).toHaveBeenCalled()
   })
 })

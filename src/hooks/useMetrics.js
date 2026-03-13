@@ -8,7 +8,6 @@ import { usePolling } from './usePolling.js'
  * Polls current metrics every 30 s and provides a manual trigger for historical
  * metrics.
  *
- * @param {number|string} customerId
  * @param {number|string} agentId
  * @returns {{
  *   currentMetrics: object|null,
@@ -21,30 +20,30 @@ import { usePolling } from './usePolling.js'
  *   fetchHistory: (options?: object) => Promise<void>
  * }}
  */
-export function useMetrics(customerId, agentId) {
+export function useMetrics(agentId) {
   const [currentMetrics, setCurrentMetrics] = useState(null)
   const [historicalMetrics, setHistoricalMetrics] = useState(null)
 
-  // Build the polling callback. It captures customerId/agentId from the closure;
-  // because usePolling updates its internal ref each render, changes to these
-  // values automatically take effect on the next poll tick. We also include
-  // them in the dependency array so the effect re-runs (resets the interval)
-  // whenever either value changes.
   const pollCallback = useCallback(async () => {
-    const data = await fetchCurrentMetrics(customerId, agentId)
+    const data = await fetchCurrentMetrics(agentId)
     setCurrentMetrics(data)
-  }, [customerId, agentId])
+  }, [agentId])
 
   const { isPolling, lastUpdate, consecutiveFailures, connectionLost, error } =
-    usePolling(pollCallback, 30000, !!customerId)
+    usePolling(pollCallback, 30000, !!agentId)
 
   const fetchHistory = useCallback(
     async (options = {}) => {
-      if (!customerId) return
-      const data = await fetchHistoricalMetrics(customerId, agentId, options)
-      setHistoricalMetrics(data)
+      if (!agentId) return
+      try {
+        const data = await fetchHistoricalMetrics(agentId, options)
+        setHistoricalMetrics(data)
+      } catch {
+        // Historical fetch errors are non-fatal; current-metrics polling
+        // already surfaces connection issues via usePolling.
+      }
     },
-    [customerId, agentId]
+    [agentId]
   )
 
   return {

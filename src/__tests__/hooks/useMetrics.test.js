@@ -42,14 +42,14 @@ describe('useMetrics', () => {
     vi.useRealTimers()
   })
 
-  it('fetches current metrics on mount with provided customerId and agentId', async () => {
-    const { result } = renderHook(() => useMetrics(1, 7))
+  it('fetches current metrics on mount with provided agentId', async () => {
+    const { result } = renderHook(() => useMetrics(7))
 
     await act(async () => {
       await Promise.resolve()
     })
 
-    expect(fetchCurrentMetrics).toHaveBeenCalledWith(1, 7)
+    expect(fetchCurrentMetrics).toHaveBeenCalledWith(7)
     expect(result.current.currentMetrics).toEqual(mockCurrentData)
   })
 
@@ -61,7 +61,7 @@ describe('useMetrics', () => {
       })
     )
 
-    const { result } = renderHook(() => useMetrics(1, 7))
+    const { result } = renderHook(() => useMetrics(7))
     expect(result.current.isLoading).toBe(true)
 
     await act(async () => {
@@ -72,29 +72,10 @@ describe('useMetrics', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
-  it('re-fetches when customerId changes', async () => {
-    const { result, rerender } = renderHook(
-      ({ customerId, agentId }) => useMetrics(customerId, agentId),
-      { initialProps: { customerId: 1, agentId: 7 } }
-    )
-
-    await act(async () => {
-      await Promise.resolve()
-    })
-    expect(fetchCurrentMetrics).toHaveBeenCalledTimes(1)
-
-    rerender({ customerId: 2, agentId: 7 })
-    await act(async () => {
-      await Promise.resolve()
-    })
-    expect(fetchCurrentMetrics).toHaveBeenCalledTimes(2)
-    expect(fetchCurrentMetrics).toHaveBeenLastCalledWith(2, 7)
-  })
-
   it('re-fetches when agentId changes', async () => {
     const { result, rerender } = renderHook(
-      ({ customerId, agentId }) => useMetrics(customerId, agentId),
-      { initialProps: { customerId: 1, agentId: 7 } }
+      ({ agentId }) => useMetrics(agentId),
+      { initialProps: { agentId: 7 } }
     )
 
     await act(async () => {
@@ -102,16 +83,16 @@ describe('useMetrics', () => {
     })
     expect(fetchCurrentMetrics).toHaveBeenCalledTimes(1)
 
-    rerender({ customerId: 1, agentId: 8 })
+    rerender({ agentId: 8 })
     await act(async () => {
       await Promise.resolve()
     })
     expect(fetchCurrentMetrics).toHaveBeenCalledTimes(2)
-    expect(fetchCurrentMetrics).toHaveBeenLastCalledWith(1, 8)
+    expect(fetchCurrentMetrics).toHaveBeenLastCalledWith(8)
   })
 
   it('fetchHistory fetches historical metrics with default options', async () => {
-    const { result } = renderHook(() => useMetrics(1, 7))
+    const { result } = renderHook(() => useMetrics(7))
 
     await act(async () => {
       await Promise.resolve()
@@ -121,12 +102,12 @@ describe('useMetrics', () => {
       await result.current.fetchHistory()
     })
 
-    expect(fetchHistoricalMetrics).toHaveBeenCalledWith(1, 7, {})
+    expect(fetchHistoricalMetrics).toHaveBeenCalledWith(7, {})
     expect(result.current.historicalMetrics).toEqual(mockHistoricalData)
   })
 
   it('fetchHistory passes custom options', async () => {
-    const { result } = renderHook(() => useMetrics(1, 7))
+    const { result } = renderHook(() => useMetrics(7))
 
     await act(async () => {
       await Promise.resolve()
@@ -136,14 +117,14 @@ describe('useMetrics', () => {
       await result.current.fetchHistory({ days: 7, page: 1, size: 10 })
     })
 
-    expect(fetchHistoricalMetrics).toHaveBeenCalledWith(1, 7, { days: 7, page: 1, size: 10 })
+    expect(fetchHistoricalMetrics).toHaveBeenCalledWith(7, { days: 7, page: 1, size: 10 })
   })
 
   it('sets error when fetch fails', async () => {
     const error = new Error('API error')
     fetchCurrentMetrics.mockRejectedValue(error)
 
-    const { result } = renderHook(() => useMetrics(1, 7))
+    const { result } = renderHook(() => useMetrics(7))
 
     await act(async () => {
       await Promise.resolve()
@@ -153,7 +134,7 @@ describe('useMetrics', () => {
   })
 
   it('returns lastUpdate and connectionLost from polling state', async () => {
-    const { result } = renderHook(() => useMetrics(1, 7))
+    const { result } = renderHook(() => useMetrics(7))
 
     await act(async () => {
       await Promise.resolve()

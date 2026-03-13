@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Dashboard from '../../components/Dashboard'
 
 vi.mock('../../services/api', () => ({
-  fetchCustomers: vi.fn(),
   fetchAgents: vi.fn(),
   fetchCurrentMetrics: vi.fn(),
   fetchHistoricalMetrics: vi.fn(),
@@ -30,7 +29,6 @@ const defaultMetrics = {
 beforeEach(() => {
   vi.clearAllMocks()
   useMetrics.mockReturnValue(defaultMetrics)
-  api.fetchCustomers.mockResolvedValue([])
   api.fetchAgents.mockResolvedValue([])
 })
 
@@ -151,11 +149,11 @@ describe('Dashboard polling integration', () => {
     })
   })
 
-  it('mocks fetchCustomers and fetchAgents correctly', async () => {
-    api.fetchCustomers.mockResolvedValue([{ id: 1, name: 'Test Corp' }])
+  it('mocks fetchAgents correctly', async () => {
+    api.fetchAgents.mockResolvedValue([{ id: 1, name: 'Test Agent' }])
     render(<Dashboard />)
     await waitFor(() => {
-      expect(api.fetchCustomers).toHaveBeenCalledTimes(1)
+      expect(api.fetchAgents).toHaveBeenCalledTimes(1)
     })
   })
 })

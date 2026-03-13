@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchCustomers, fetchAgents } from '../services/api'
+import { fetchAgents } from '../services/api'
 import { useMetrics } from '../hooks/useMetrics'
 import Header from './Header'
 import ErrorBanner from './ErrorBanner'
@@ -10,9 +10,7 @@ import CallsTable from './CallsTable'
 import Filters from './Filters'
 
 function Dashboard() {
-  const [customers, setCustomers] = useState([])
   const [agents, setAgents] = useState([])
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null)
   const [selectedAgentId, setSelectedAgentId] = useState(null)
   const [currentPage, setCurrentPage] = useState(0)
   const [currentSort, setCurrentSort] = useState('timestamp')
@@ -20,26 +18,16 @@ function Dashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
-    fetchCustomers()
-      .then((data) => setCustomers(data || []))
-      .catch(() => {})
-  }, [])
-
-  useEffect(() => {
-    if (!selectedCustomerId) {
-      setAgents([])
-      setSelectedAgentId(null)
-      return
-    }
-    fetchAgents(selectedCustomerId)
-      .then((data) => setAgents(data || []))
+    fetchAgents()
+      .then((data) => {
+        const list = data || []
+        setAgents(list)
+        if (list.length > 0) {
+          setSelectedAgentId(String(list[0].id))
+        }
+      })
       .catch(() => setAgents([]))
-  }, [selectedCustomerId])
-
-  const handleCustomerChange = (id) => {
-    setSelectedCustomerId(id || null)
-    setSelectedAgentId(null)
-  }
+  }, [])
 
   const handleAgentChange = (id) => {
     setSelectedAgentId(id || null)
@@ -54,7 +42,7 @@ function Dashboard() {
     connectionLost,
     consecutiveFailures,
     fetchHistory,
-  } = useMetrics(selectedCustomerId, selectedAgentId)
+  } = useMetrics(selectedAgentId)
 
   useEffect(() => {
     fetchHistory({ days })
@@ -68,7 +56,14 @@ function Dashboard() {
 
   const handleStatusFilterChange = (newStatus) => {
     setStatusFilter(newStatus)
+    setCurrentPage(0)
   }
+
+  const filteredContent = (() => {
+    const content = historicalMetrics?.content
+    if (!content || statusFilter === 'all') return content
+    return content.filter((row) => (row[statusFilter] ?? 0) > 0)
+  })()
 
   return (
     <div className="min-h-screen bg-background noise-bg relative" id="dashboard">
@@ -77,11 +72,8 @@ function Dashboard() {
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Header
-          customers={customers}
           agents={agents}
-          selectedCustomerId={selectedCustomerId}
           selectedAgentId={selectedAgentId}
-          onCustomerChange={handleCustomerChange}
           onAgentChange={handleAgentChange}
           lastUpdate={lastUpdate}
         />
@@ -102,13 +94,13 @@ function Dashboard() {
         <MetricsGrid metrics={currentMetrics} />
 
         <ChartsSection
-          historicalData={historicalMetrics?.content}
+          historicalData={filteredContent}
           currentMetrics={currentMetrics}
         />
 
         <CallsTable
-          data={historicalMetrics?.content}
-          totalElements={historicalMetrics?.total_elements}
+          data={filteredContent}
+          totalElements={filteredContent?.length ?? 0}
           page={historicalMetrics?.page ?? currentPage}
           size={historicalMetrics?.size}
           totalPages={historicalMetrics?.total_pages ?? 1}

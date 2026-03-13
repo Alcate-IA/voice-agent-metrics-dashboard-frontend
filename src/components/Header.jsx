@@ -8,11 +8,8 @@ import {
 import { Activity } from 'lucide-react'
 
 function Header({
-  customers = [],
   agents = [],
-  selectedCustomerId,
   selectedAgentId,
-  onCustomerChange,
   onAgentChange,
   lastUpdate,
 }) {
@@ -34,35 +31,14 @@ function Header({
 
       <div className="flex flex-wrap items-center gap-3">
         <Select
-          value={selectedCustomerId ? String(selectedCustomerId) : undefined}
-          onValueChange={onCustomerChange}
+          value={selectedAgentId ? String(selectedAgentId) : ''}
+          onValueChange={onAgentChange}
         >
           <SelectTrigger
             className="w-[200px] bg-card border-border hover:border-cyan-500/30 transition-colors"
-            aria-label="Select customer"
-          >
-            <SelectValue placeholder="All customers" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">All customers</SelectItem>
-            {customers.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={selectedAgentId ? String(selectedAgentId) : undefined}
-          onValueChange={onAgentChange}
-          disabled={!selectedCustomerId}
-        >
-          <SelectTrigger
-            className="w-[200px] bg-card border-border hover:border-cyan-500/30 transition-colors disabled:opacity-40"
             aria-label="Select agent"
           >
-            <SelectValue placeholder="All agents" />
+            <SelectValue placeholder="Select agent" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All agents</SelectItem>

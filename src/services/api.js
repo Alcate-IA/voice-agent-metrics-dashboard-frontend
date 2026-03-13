@@ -11,14 +11,11 @@ const apiClient = axios.create({
  */
 const unwrap = (response) => response.data?.data ?? response.data
 
-export const fetchCustomers = () =>
-  apiClient.get('/api/customers').then(unwrap)
+export const fetchAgents = () =>
+  apiClient.get('/api/agents').then(unwrap)
 
-export const fetchAgents = (customerId) =>
-  apiClient.get('/api/agents', { params: { customerId } }).then(unwrap)
-
-export const fetchCurrentMetrics = (customerId, agentId) =>
-  apiClient.get('/api/metrics', { params: { customerId, agentId } }).then(unwrap)
+export const fetchCurrentMetrics = (agentId) =>
+  apiClient.get('/api/metrics', { params: { agentId } }).then(unwrap)
 
 /**
  * Map frontend snake_case sort fields to backend camelCase entity fields.
@@ -34,14 +31,13 @@ const SORT_FIELD_MAP = {
 }
 
 export const fetchHistoricalMetrics = (
-  customerId,
   agentId,
   { days = 30, page = 0, size = 20, sortBy = 'timestamp' } = {}
 ) => {
   const mappedSort = SORT_FIELD_MAP[sortBy] || 'timestamp'
   return apiClient
     .get('/api/metrics/history', {
-      params: { customerId, agentId, days, page, size, sortBy: mappedSort },
+      params: { agentId, days, page, size, sortBy: mappedSort },
     })
     .then(unwrap)
 }
