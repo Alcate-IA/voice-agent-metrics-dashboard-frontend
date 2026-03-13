@@ -36,10 +36,11 @@ export function useMetrics(customerId, agentId) {
   }, [customerId, agentId])
 
   const { isPolling, lastUpdate, consecutiveFailures, connectionLost, error } =
-    usePolling(pollCallback, 30000)
+    usePolling(pollCallback, 30000, !!customerId)
 
   const fetchHistory = useCallback(
     async (options = {}) => {
+      if (!customerId) return
       const data = await fetchHistoricalMetrics(customerId, agentId, options)
       setHistoricalMetrics(data)
     },
