@@ -6,6 +6,7 @@ import ErrorBanner from './ErrorBanner'
 import ConnectionStatus from './ConnectionStatus'
 import MetricsGrid from './MetricsGrid'
 import ChartsSection from './ChartsSection'
+import CallsTable from './CallsTable'
 import styles from '../styles/Dashboard.module.css'
 
 /**
@@ -19,6 +20,8 @@ function Dashboard() {
   const [agents, setAgents] = useState([])
   const [selectedCustomerId, setSelectedCustomerId] = useState(null)
   const [selectedAgentId, setSelectedAgentId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [currentSort, setCurrentSort] = useState('timestamp')
 
   // Load customer list once on mount
   useEffect(() => {
@@ -93,8 +96,25 @@ function Dashboard() {
         />
       </div>
 
-      {/* Placeholder: CallsTable */}
-      <div className={styles.tableSection} aria-label="Calls table placeholder" />
+      <div className={styles.tableSection}>
+        <CallsTable
+          data={historicalMetrics?.content}
+          totalElements={historicalMetrics?.total_elements}
+          page={historicalMetrics?.page ?? currentPage}
+          size={historicalMetrics?.size}
+          totalPages={historicalMetrics?.total_pages ?? 1}
+          onPageChange={(newPage) => {
+            setCurrentPage(newPage)
+            fetchHistory({ page: newPage, sortBy: currentSort })
+          }}
+          onSortChange={(field) => {
+            setCurrentSort(field)
+            setCurrentPage(0)
+            fetchHistory({ page: 0, sortBy: field })
+          }}
+          currentSort={currentSort}
+        />
+      </div>
 
       <ConnectionStatus
         lastUpdate={lastUpdate}
