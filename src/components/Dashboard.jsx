@@ -5,6 +5,7 @@ import Header from './Header'
 import ErrorBanner from './ErrorBanner'
 import ConnectionStatus from './ConnectionStatus'
 import MetricsGrid from './MetricsGrid'
+import ChartsSection from './ChartsSection'
 import styles from '../styles/Dashboard.module.css'
 
 /**
@@ -51,12 +52,19 @@ function Dashboard() {
 
   const {
     currentMetrics,
+    historicalMetrics,
     isLoading,
     error,
     lastUpdate,
     connectionLost,
     consecutiveFailures,
+    fetchHistory,
   } = useMetrics(selectedCustomerId, selectedAgentId)
+
+  // Fetch historical data on mount and whenever customer/agent selection changes
+  useEffect(() => {
+    fetchHistory()
+  }, [fetchHistory])
 
   return (
     <div className={styles.dashboard} id="dashboard">
@@ -78,8 +86,12 @@ function Dashboard() {
 
       <MetricsGrid metrics={currentMetrics} />
 
-      {/* Placeholder: ChartsSection */}
-      <div className={styles.chartsSection} aria-label="Charts section placeholder" />
+      <div className={styles.chartsSection}>
+        <ChartsSection
+          historicalData={historicalMetrics?.content}
+          currentMetrics={currentMetrics}
+        />
+      </div>
 
       {/* Placeholder: CallsTable */}
       <div className={styles.tableSection} aria-label="Calls table placeholder" />

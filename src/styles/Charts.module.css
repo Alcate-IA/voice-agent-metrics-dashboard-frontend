@@ -1,0 +1,49 @@
+/* =========================================================
+   Charts
+   ========================================================= */
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chartCard {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6c757d;
+  margin: 0 0 1rem 0;
+}
+
+.noData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+  font-size: 0.95rem;
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   Responsive — Mobile (≤768px)
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
