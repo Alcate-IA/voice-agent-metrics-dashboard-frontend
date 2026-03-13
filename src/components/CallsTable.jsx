@@ -1,9 +1,17 @@
-import styles from '../styles/CallsTable.module.css'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-/**
- * Formats a UTC ISO timestamp string to "YYYY-MM-DD HH:mm".
- * Uses UTC to ensure consistent output regardless of local timezone.
- */
 function formatTimestamp(ts) {
   if (!ts) return ''
   const d = new Date(ts)
@@ -15,17 +23,11 @@ function formatTimestamp(ts) {
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-/**
- * Formats a numeric duration as "X.Xs".
- */
 function formatDuration(val) {
   if (val == null) return ''
   return `${val}s`
 }
 
-/**
- * Formats a numeric cost as "$X.XXXX".
- */
 function formatCost(val) {
   if (val == null) return ''
   return `$${Number(val).toFixed(4)}`
@@ -41,20 +43,6 @@ const COLUMNS = [
   { label: 'Cost', field: 'total_cost', format: formatCost },
 ]
 
-/**
- * CallsTable — displays historical metrics records with sortable columns
- * and pagination controls.
- *
- * @param {object} props
- * @param {Array}  props.data          - Array of record objects
- * @param {number} props.totalElements - Total number of records
- * @param {number} props.page          - Current zero-based page index
- * @param {number} props.size          - Page size
- * @param {number} props.totalPages    - Total page count
- * @param {function} props.onPageChange  - Called with new page index
- * @param {function} props.onSortChange  - Called with field name string
- * @param {string} props.currentSort   - Currently active sort field
- */
 function CallsTable({
   data,
   totalElements,
@@ -68,68 +56,120 @@ function CallsTable({
   const isEmpty = !data || data.length === 0
 
   return (
-    <div className={styles.tableContainer}>
-      <h2 className={styles.tableTitle}>Recent Calls</h2>
+    <Card
+      className="animate-fade-up bg-card/50 backdrop-blur-sm"
+      style={{ animationDelay: '0.3s' }}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Recent Calls
+          </CardTitle>
+          {totalElements > 0 && (
+            <Badge variant="secondary" className="font-mono text-xs">
+              {totalElements} records
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {isEmpty ? (
+          <p className="text-muted-foreground text-center py-12 text-sm">
+            No data available
+          </p>
+        ) : (
+          <>
+            <div className="rounded-md border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-border">
+                    {COLUMNS.map(({ label, field }) => {
+                      const isActive = currentSort === field
+                      return (
+                        <TableHead
+                          key={field}
+                          className={cn(
+                            'cursor-pointer select-none text-xs font-semibold uppercase tracking-wider transition-colors hover:text-foreground whitespace-nowrap',
+                            isActive ? 'text-cyan-400' : 'text-muted-foreground'
+                          )}
+                          onClick={() => onSortChange && onSortChange(field)}
+                          role="columnheader"
+                          aria-sort={isActive ? 'ascending' : 'none'}
+                        >
+                          <span className="flex items-center gap-1">
+                            {label}
+                            {isActive ? (
+                              <ArrowUp className="w-3 h-3" />
+                            ) : (
+                              <ArrowUpDown className="w-3 h-3 opacity-30" />
+                            )}
+                          </span>
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((row, idx) => (
+                    <TableRow
+                      key={idx}
+                      className="border-border hover:bg-accent/50 transition-colors"
+                    >
+                      {COLUMNS.map(({ field, format }) => (
+                        <TableCell
+                          key={field}
+                          className={cn(
+                            'py-2.5 text-sm whitespace-nowrap',
+                            field === 'timestamp' && 'font-mono text-xs text-muted-foreground',
+                            field === 'total_cost' && 'font-mono',
+                            field === 'avg_duration' && 'font-mono',
+                            field === 'completed' && 'text-emerald-400',
+                            field === 'failed' && 'text-rose-400',
+                            field === 'pending' && 'text-amber-400'
+                          )}
+                        >
+                          {format(row[field])}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-      {isEmpty ? (
-        <p className={styles.noData}>No data available</p>
-      ) : (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              {COLUMNS.map(({ label, field }) => {
-                const isActive = currentSort === field
-                return (
-                  <th
-                    key={field}
-                    className={`${styles.th}${isActive ? ` ${styles.active}` : ''}`}
-                    onClick={() => onSortChange && onSortChange(field)}
-                    role="columnheader"
-                    aria-sort={isActive ? 'ascending' : 'none'}
-                  >
-                    {label}
-                    {isActive && ' ▲'}
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, idx) => (
-              <tr key={idx} className={styles.tr}>
-                {COLUMNS.map(({ field, format }) => (
-                  <td key={field} className={styles.td}>
-                    {format(row[field])}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            <div className="flex items-center justify-between mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange && onPageChange(page - 1)}
+                disabled={page === 0}
+                className="gap-1"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
 
-      <div className={styles.pagination}>
-        <button
-          className={styles.pageButton}
-          onClick={() => onPageChange && onPageChange(page - 1)}
-          disabled={page === 0}
-          aria-label="Previous"
-        >
-          Previous
-        </button>
-        <span className={styles.pageInfo}>
-          Page {page + 1} of {totalPages}
-        </span>
-        <button
-          className={styles.pageButton}
-          onClick={() => onPageChange && onPageChange(page + 1)}
-          disabled={page >= totalPages - 1}
-          aria-label="Next"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+              <span className="text-xs text-muted-foreground font-mono tabular-nums">
+                Page {page + 1} of {totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange && onPageChange(page + 1)}
+                disabled={page >= totalPages - 1}
+                className="gap-1"
+                aria-label="Next"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

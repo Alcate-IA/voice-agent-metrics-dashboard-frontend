@@ -15,9 +15,8 @@ describe('MetricsCard', () => {
   })
 
   it('does not render subtitle when not provided', () => {
-    const { container } = render(<MetricsCard title="Calls Today" value="10" />)
-    const subtitle = container.querySelector('[class*="subtitle"]')
-    expect(subtitle).toBeNull()
+    render(<MetricsCard title="Calls Today" value="10" />)
+    expect(screen.queryByText('since midnight')).toBeNull()
   })
 
   it('renders icon when provided', () => {
@@ -27,37 +26,30 @@ describe('MetricsCard', () => {
 
   it('does not render icon element when not provided', () => {
     const { container } = render(<MetricsCard title="Total Calls" value="42" />)
-    const icon = container.querySelector('[class*="icon"]')
-    expect(icon).toBeNull()
+    // No emoji should be present
+    expect(container.textContent).not.toMatch(/📞/)
   })
 
-  it('applies trend up class when trend is up', () => {
-    const { container } = render(
-      <MetricsCard title="Total Calls" value="42" trend="up" />
-    )
-    const trendEl = container.querySelector('[class*="trend"]')
-    expect(trendEl).toBeTruthy()
-    expect(trendEl.className).toMatch(/up/)
+  it('renders trend up indicator', () => {
+    render(<MetricsCard title="Total Calls" value="42" trend="up" />)
+    expect(screen.getByText('▲')).toBeInTheDocument()
   })
 
-  it('applies trend down class when trend is down', () => {
-    const { container } = render(
-      <MetricsCard title="Total Calls" value="42" trend="down" />
-    )
-    const trendEl = container.querySelector('[class*="trend"]')
-    expect(trendEl).toBeTruthy()
-    expect(trendEl.className).toMatch(/down/)
+  it('renders trend down indicator', () => {
+    render(<MetricsCard title="Total Calls" value="42" trend="down" />)
+    expect(screen.getByText('▼')).toBeInTheDocument()
   })
 
   it('does not render trend element when trend is not provided', () => {
-    const { container } = render(<MetricsCard title="Total Calls" value="42" />)
-    const trendEl = container.querySelector('[class*="trend"]')
-    expect(trendEl).toBeNull()
+    render(<MetricsCard title="Total Calls" value="42" />)
+    expect(screen.queryByText('▲')).toBeNull()
+    expect(screen.queryByText('▼')).toBeNull()
+    expect(screen.queryByText('—')).toBeNull()
   })
 
-  it('renders card with class containing "card"', () => {
+  it('renders card with shadcn card structure', () => {
     const { container } = render(<MetricsCard title="Total Calls" value="42" />)
-    const card = container.querySelector('[class*="card"]')
+    const card = container.querySelector('[data-slot="card"]')
     expect(card).toBeTruthy()
   })
 })

@@ -82,7 +82,7 @@ describe('ChartsSection', () => {
     const { container } = render(
       <ChartsSection historicalData={mockHistoricalData} currentMetrics={mockCurrentMetrics} />
     )
-    const grid = container.querySelector('[class*="chartsGrid"]')
+    const grid = container.querySelector('.grid')
     expect(grid).toBeTruthy()
   })
 })

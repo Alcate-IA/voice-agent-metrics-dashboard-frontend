@@ -111,20 +111,21 @@ describe('CallsTable', () => {
     expect(screen.getByText('1')).toBeInTheDocument()
   })
 
-  it('shows sort indicator (▲ or ▼) on active sort column', () => {
+  it('shows sort indicator on active sort column', () => {
     render(<CallsTable {...defaultProps} currentSort="timestamp" />)
     const dateHeader = screen.getAllByRole('columnheader').find(h =>
-      h.textContent.replace(/[▲▼]/g, '').trim() === 'Date/Time'
+      h.textContent.includes('Date/Time')
     )
-    expect(dateHeader.textContent).toMatch(/[▲▼]/)
+    // Active column has cyan text color class
+    expect(dateHeader.className).toContain('cyan')
   })
 
-  it('does not show sort indicator on inactive columns', () => {
+  it('does not highlight inactive columns', () => {
     render(<CallsTable {...defaultProps} currentSort="timestamp" />)
     const totalCallsHeader = screen.getAllByRole('columnheader').find(h =>
-      h.textContent.replace(/[▲▼]/g, '').trim() === 'Total Calls'
+      h.textContent.includes('Total Calls')
     )
-    expect(totalCallsHeader.textContent).not.toMatch(/[▲▼]/)
+    expect(totalCallsHeader.className).not.toContain('cyan')
   })
 
   it('calls onSortChange with field name when column header clicked', () => {

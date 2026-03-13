@@ -43,7 +43,7 @@ describe('CallsOverTimeChart', () => {
 
   it('renders card container', () => {
     const { container } = render(<CallsOverTimeChart data={mockData} />)
-    const card = container.querySelector('[class*="chartCard"]')
+    const card = container.querySelector('[data-slot="card"]')
     expect(card).toBeTruthy()
   })
 })

@@ -26,9 +26,9 @@ const mockMetrics = {
 }
 
 describe('StatusBreakdownChart', () => {
-  it('renders title "Call Status Breakdown"', () => {
+  it('renders title "Status Breakdown"', () => {
     render(<StatusBreakdownChart data={mockMetrics} />)
-    expect(screen.getByText('Call Status Breakdown')).toBeInTheDocument()
+    expect(screen.getByText('Status Breakdown')).toBeInTheDocument()
   })
 
   it('renders with metrics data', () => {
@@ -39,12 +39,12 @@ describe('StatusBreakdownChart', () => {
 
   it('renders card container', () => {
     const { container } = render(<StatusBreakdownChart data={mockMetrics} />)
-    const card = container.querySelector('[class*="chartCard"]')
+    const card = container.querySelector('[data-slot="card"]')
     expect(card).toBeTruthy()
   })
 
   it('renders with null data gracefully', () => {
     render(<StatusBreakdownChart data={null} />)
-    expect(screen.getByText('Call Status Breakdown')).toBeInTheDocument()
+    expect(screen.getByText('Status Breakdown')).toBeInTheDocument()
   })
 })

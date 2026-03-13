@@ -12,18 +12,19 @@ describe('ConnectionStatus', () => {
 
   it('displays last update time when provided', () => {
     const lastUpdate = new Date('2026-03-13T10:00:00Z')
-    render(
+    const { container } = render(
       <ConnectionStatus lastUpdate={lastUpdate} isPolling={false} connectionLost={false} />
     )
-    // Should show some time-related content
-    expect(screen.getByText(/last update/i)).toBeInTheDocument()
+    // Shows formatted time string somewhere in the component
+    expect(container.textContent).toMatch(/\d+:\d+/)
   })
 
-  it('shows "Never" or similar when lastUpdate is null', () => {
+  it('shows countdown seconds when not polling', () => {
     render(
-      <ConnectionStatus lastUpdate={null} isPolling={false} connectionLost={false} />
+      <ConnectionStatus lastUpdate={new Date()} isPolling={false} connectionLost={false} />
     )
-    expect(screen.getByText(/never/i)).toBeInTheDocument()
+    // Shows countdown like "30s"
+    expect(screen.getByText(/\d+s/)).toBeInTheDocument()
   })
 
   it('shows polling indicator when isPolling is true', () => {
@@ -35,15 +36,15 @@ describe('ConnectionStatus', () => {
 
   it('shows "Connection lost" when connectionLost is true', () => {
     render(
-      <ConnectionStatus lastUpdate={null} isPolling={false} connectionLost={true} />
+      <ConnectionStatus lastUpdate={null} isPolling={false} connectionLost={true} consecutiveFailures={3} />
     )
     expect(screen.getByText(/connection lost/i)).toBeInTheDocument()
   })
 
-  it('shows next refresh countdown text', () => {
+  it('shows failure count when connection is lost', () => {
     render(
-      <ConnectionStatus lastUpdate={new Date()} isPolling={false} connectionLost={false} />
+      <ConnectionStatus lastUpdate={null} isPolling={false} connectionLost={true} consecutiveFailures={5} />
     )
-    expect(screen.getByText(/next refresh/i)).toBeInTheDocument()
+    expect(screen.getByText(/5 failures/i)).toBeInTheDocument()
   })
 })

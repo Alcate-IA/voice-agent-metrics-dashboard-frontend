@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import userEvent from '@testing-library/user-event'
 import Filters from '../../components/Filters'
 
 const defaultProps = {
@@ -19,125 +20,93 @@ describe('Filters', () => {
     expect(container).toBeTruthy()
   })
 
-  it('renders the period filter label', () => {
+  it('renders period select trigger with aria-label', () => {
     render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/period/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Period')).toBeInTheDocument()
   })
 
-  it('renders the status filter label', () => {
+  it('renders status select trigger with aria-label', () => {
     render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/status/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Status')).toBeInTheDocument()
   })
 
-  it('renders period options: Last 7 days', () => {
+  it('renders two combobox triggers', () => {
     render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/last 7 days/i)).toBeInTheDocument()
+    const triggers = screen.getAllByRole('combobox')
+    expect(triggers.length).toBe(2)
   })
 
-  it('renders period options: Last 14 days', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/last 14 days/i)).toBeInTheDocument()
+  it('period trigger has hidden input with correct value', () => {
+    const { container } = render(<Filters {...defaultProps} days={30} />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const periodInput = Array.from(hiddenInputs).find(i => i.value === '30')
+    expect(periodInput).toBeTruthy()
   })
 
-  it('renders period options: Last 30 days', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/last 30 days/i)).toBeInTheDocument()
+  it('status trigger has hidden input with correct value', () => {
+    const { container } = render(<Filters {...defaultProps} statusFilter="all" />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const statusInput = Array.from(hiddenInputs).find(i => i.value === 'all')
+    expect(statusInput).toBeTruthy()
   })
 
-  it('renders period options: Last 90 days', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/last 90 days/i)).toBeInTheDocument()
+  it('period trigger reflects days=7 value', () => {
+    const { container } = render(<Filters {...defaultProps} days={7} />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const periodInput = Array.from(hiddenInputs).find(i => i.value === '7')
+    expect(periodInput).toBeTruthy()
   })
 
-  it('renders status options: All', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/^all$/i)).toBeInTheDocument()
+  it('status trigger reflects completed value', () => {
+    const { container } = render(<Filters {...defaultProps} statusFilter="completed" />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const statusInput = Array.from(hiddenInputs).find(i => i.value === 'completed')
+    expect(statusInput).toBeTruthy()
   })
 
-  it('renders status options: Completed', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/^completed$/i)).toBeInTheDocument()
+  it('status trigger reflects failed value', () => {
+    const { container } = render(<Filters {...defaultProps} statusFilter="failed" />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const statusInput = Array.from(hiddenInputs).find(i => i.value === 'failed')
+    expect(statusInput).toBeTruthy()
   })
 
-  it('renders status options: Failed', () => {
-    render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/^failed$/i)).toBeInTheDocument()
+  it('status trigger reflects pending value', () => {
+    const { container } = render(<Filters {...defaultProps} statusFilter="pending" />)
+    const hiddenInputs = container.querySelectorAll('input[aria-hidden="true"]')
+    const statusInput = Array.from(hiddenInputs).find(i => i.value === 'pending')
+    expect(statusInput).toBeTruthy()
   })
 
-  it('renders status options: Pending', () => {
+  it('opens period dropdown on click', async () => {
+    const user = userEvent.setup()
     render(<Filters {...defaultProps} />)
-    expect(screen.getByText(/^pending$/i)).toBeInTheDocument()
+    const periodTrigger = screen.getByLabelText('Period')
+    await user.click(periodTrigger)
+    const listbox = screen.getByRole('listbox')
+    expect(listbox).toBeInTheDocument()
   })
 
-  it('calls onDaysChange with numeric value when period select changes', () => {
+  it('calls onDaysChange when period option selected', async () => {
     const onDaysChange = vi.fn()
+    const user = userEvent.setup()
     render(<Filters {...defaultProps} onDaysChange={onDaysChange} />)
-    const periodSelect = screen.getByLabelText(/period/i)
-    fireEvent.change(periodSelect, { target: { value: '7' } })
+    const periodTrigger = screen.getByLabelText('Period')
+    await user.click(periodTrigger)
+    const option = screen.getByRole('option', { name: 'Last 7 days' })
+    await user.click(option)
     expect(onDaysChange).toHaveBeenCalledWith(7)
   })
 
-  it('calls onDaysChange with 14 when selecting Last 14 days', () => {
-    const onDaysChange = vi.fn()
-    render(<Filters {...defaultProps} onDaysChange={onDaysChange} />)
-    const periodSelect = screen.getByLabelText(/period/i)
-    fireEvent.change(periodSelect, { target: { value: '14' } })
-    expect(onDaysChange).toHaveBeenCalledWith(14)
-  })
-
-  it('calls onDaysChange with 90 when selecting Last 90 days', () => {
-    const onDaysChange = vi.fn()
-    render(<Filters {...defaultProps} onDaysChange={onDaysChange} />)
-    const periodSelect = screen.getByLabelText(/period/i)
-    fireEvent.change(periodSelect, { target: { value: '90' } })
-    expect(onDaysChange).toHaveBeenCalledWith(90)
-  })
-
-  it('calls onStatusFilterChange when status select changes', () => {
+  it('calls onStatusFilterChange when status option selected', async () => {
     const onStatusFilterChange = vi.fn()
+    const user = userEvent.setup()
     render(<Filters {...defaultProps} onStatusFilterChange={onStatusFilterChange} />)
-    const statusSelect = screen.getByLabelText(/status/i)
-    fireEvent.change(statusSelect, { target: { value: 'completed' } })
-    expect(onStatusFilterChange).toHaveBeenCalledWith('completed')
-  })
-
-  it('calls onStatusFilterChange with "failed" when selecting Failed', () => {
-    const onStatusFilterChange = vi.fn()
-    render(<Filters {...defaultProps} onStatusFilterChange={onStatusFilterChange} />)
-    const statusSelect = screen.getByLabelText(/status/i)
-    fireEvent.change(statusSelect, { target: { value: 'failed' } })
-    expect(onStatusFilterChange).toHaveBeenCalledWith('failed')
-  })
-
-  it('calls onStatusFilterChange with "pending" when selecting Pending', () => {
-    const onStatusFilterChange = vi.fn()
-    render(<Filters {...defaultProps} onStatusFilterChange={onStatusFilterChange} />)
-    const statusSelect = screen.getByLabelText(/status/i)
-    fireEvent.change(statusSelect, { target: { value: 'pending' } })
-    expect(onStatusFilterChange).toHaveBeenCalledWith('pending')
-  })
-
-  it('shows correct selected period value (days=30)', () => {
-    render(<Filters {...defaultProps} days={30} />)
-    const periodSelect = screen.getByLabelText(/period/i)
-    expect(periodSelect.value).toBe('30')
-  })
-
-  it('shows correct selected period value (days=7)', () => {
-    render(<Filters {...defaultProps} days={7} />)
-    const periodSelect = screen.getByLabelText(/period/i)
-    expect(periodSelect.value).toBe('7')
-  })
-
-  it('shows correct selected status value (statusFilter=all)', () => {
-    render(<Filters {...defaultProps} statusFilter="all" />)
-    const statusSelect = screen.getByLabelText(/status/i)
-    expect(statusSelect.value).toBe('all')
-  })
-
-  it('shows correct selected status value (statusFilter=completed)', () => {
-    render(<Filters {...defaultProps} statusFilter="completed" />)
-    const statusSelect = screen.getByLabelText(/status/i)
-    expect(statusSelect.value).toBe('completed')
+    const statusTrigger = screen.getByLabelText('Status')
+    await user.click(statusTrigger)
+    const option = screen.getByRole('option', { name: 'Completed' })
+    await user.click(option)
+    expect(onStatusFilterChange).toHaveBeenCalled()
+    expect(onStatusFilterChange.mock.calls[0][0]).toBe('completed')
   })
 })

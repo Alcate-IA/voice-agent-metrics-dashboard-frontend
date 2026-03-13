@@ -6,19 +6,22 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
-import styles from '../styles/Charts.module.css'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const STATUS_COLORS = {
-  Completed: '#4CAF50',
-  Failed: '#f44336',
-  Pending: '#ff9800',
+  Completed: '#34d399',
+  Failed: '#fb7185',
+  Pending: '#fbbf24',
 }
 
-/**
- * Donut chart showing completed/failed/pending call distribution.
- *
- * @param {{ data: { completed: number, failed: number, pending: number } | null }} props
- */
+const TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(10,10,20,0.95)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: '8px',
+  fontSize: '12px',
+  fontFamily: 'var(--font-mono)',
+}
+
 function StatusBreakdownChart({ data }) {
   const chartData = data
     ? [
@@ -29,28 +32,39 @@ function StatusBreakdownChart({ data }) {
     : []
 
   return (
-    <div className={styles.chartCard}>
-      <h3 className={styles.chartTitle}>Call Status Breakdown</h3>
-      <ResponsiveContainer width="100%" height={260}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            paddingAngle={3}
-            dataKey="value"
-          >
-            {chartData.map((entry) => (
-              <Cell key={entry.name} fill={STATUS_COLORS[entry.name]} />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="bg-card/50 backdrop-blur-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+          Status Breakdown
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={55}
+              outerRadius={85}
+              paddingAngle={4}
+              dataKey="value"
+              strokeWidth={0}
+            >
+              {chartData.map((entry) => (
+                <Cell key={entry.name} fill={STATUS_COLORS[entry.name]} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={TOOLTIP_STYLE} />
+            <Legend
+              wrapperStyle={{ fontSize: '11px', fontFamily: 'var(--font-sans)' }}
+              iconType="circle"
+              iconSize={8}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   )
 }
 

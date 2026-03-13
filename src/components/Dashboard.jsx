@@ -8,14 +8,7 @@ import MetricsGrid from './MetricsGrid'
 import ChartsSection from './ChartsSection'
 import CallsTable from './CallsTable'
 import Filters from './Filters'
-import styles from '../styles/Dashboard.module.css'
 
-/**
- * Main dashboard container.
- *
- * Manages customer/agent selection, fetches list data, delegates metric
- * polling to useMetrics, and composes the page layout.
- */
 function Dashboard() {
   const [customers, setCustomers] = useState([])
   const [agents, setAgents] = useState([])
@@ -26,16 +19,12 @@ function Dashboard() {
   const [days, setDays] = useState(30)
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Load customer list once on mount
   useEffect(() => {
     fetchCustomers()
       .then((res) => setCustomers(res.data))
-      .catch(() => {
-        // Customers list failure is non-fatal; ErrorBanner handles metrics errors
-      })
+      .catch(() => {})
   }, [])
 
-  // Reload agents whenever the selected customer changes
   useEffect(() => {
     if (!selectedCustomerId) {
       setAgents([])
@@ -67,7 +56,6 @@ function Dashboard() {
     fetchHistory,
   } = useMetrics(selectedCustomerId, selectedAgentId)
 
-  // Fetch historical data on mount and whenever customer/agent selection changes
   useEffect(() => {
     fetchHistory({ days })
   }, [fetchHistory])
@@ -83,40 +71,41 @@ function Dashboard() {
   }
 
   return (
-    <div className={styles.dashboard} id="dashboard">
-      <Header
-        customers={customers}
-        agents={agents}
-        selectedCustomerId={selectedCustomerId}
-        selectedAgentId={selectedAgentId}
-        onCustomerChange={handleCustomerChange}
-        onAgentChange={handleAgentChange}
-        lastUpdate={lastUpdate}
-      />
+    <div className="min-h-screen bg-background noise-bg relative" id="dashboard">
+      {/* Top accent gradient line */}
+      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-emerald-500 to-cyan-500 z-50 opacity-80" />
 
-      <ErrorBanner
-        error={error}
-        connectionLost={connectionLost}
-        consecutiveFailures={consecutiveFailures}
-      />
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <Header
+          customers={customers}
+          agents={agents}
+          selectedCustomerId={selectedCustomerId}
+          selectedAgentId={selectedAgentId}
+          onCustomerChange={handleCustomerChange}
+          onAgentChange={handleAgentChange}
+          lastUpdate={lastUpdate}
+        />
 
-      <Filters
-        days={days}
-        onDaysChange={handleDaysChange}
-        statusFilter={statusFilter}
-        onStatusFilterChange={handleStatusFilterChange}
-      />
+        <ErrorBanner
+          error={error}
+          connectionLost={connectionLost}
+          consecutiveFailures={consecutiveFailures}
+        />
 
-      <MetricsGrid metrics={currentMetrics} />
+        <Filters
+          days={days}
+          onDaysChange={handleDaysChange}
+          statusFilter={statusFilter}
+          onStatusFilterChange={handleStatusFilterChange}
+        />
 
-      <div className={styles.chartsSection}>
+        <MetricsGrid metrics={currentMetrics} />
+
         <ChartsSection
           historicalData={historicalMetrics?.content}
           currentMetrics={currentMetrics}
         />
-      </div>
 
-      <div className={styles.tableSection}>
         <CallsTable
           data={historicalMetrics?.content}
           totalElements={historicalMetrics?.total_elements}
@@ -134,14 +123,14 @@ function Dashboard() {
           }}
           currentSort={currentSort}
         />
-      </div>
 
-      <ConnectionStatus
-        lastUpdate={lastUpdate}
-        isPolling={isLoading}
-        connectionLost={connectionLost}
-        consecutiveFailures={consecutiveFailures}
-      />
+        <ConnectionStatus
+          lastUpdate={lastUpdate}
+          isPolling={isLoading}
+          connectionLost={connectionLost}
+          consecutiveFailures={consecutiveFailures}
+        />
+      </div>
     </div>
   )
 }

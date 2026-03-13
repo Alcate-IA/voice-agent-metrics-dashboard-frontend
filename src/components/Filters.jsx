@@ -1,4 +1,11 @@
-import styles from '../styles/Filters.module.css'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Calendar, Filter } from 'lucide-react'
 
 const PERIOD_OPTIONS = [
   { label: 'Last 7 days', value: 7 },
@@ -14,54 +21,51 @@ const STATUS_OPTIONS = [
   { label: 'Pending', value: 'pending' },
 ]
 
-/**
- * Filters — horizontal filter bar for period and call status.
- *
- * @param {object}   props
- * @param {number}   props.days                 - Currently selected days range
- * @param {function} props.onDaysChange         - Called with new numeric days value
- * @param {string}   props.statusFilter         - Currently selected status ('all'|'completed'|'failed'|'pending')
- * @param {function} props.onStatusFilterChange - Called with new status string
- */
 function Filters({ days, onDaysChange, statusFilter, onStatusFilterChange }) {
   return (
-    <div className={styles.filtersBar}>
-      <div className={styles.filterGroup}>
-        <label htmlFor="period-select" className={styles.label}>
-          Period
-        </label>
-        <select
-          id="period-select"
-          className={styles.select}
-          value={days}
-          onChange={(e) => onDaysChange(Number(e.target.value))}
-          aria-label="Period"
+    <div className="animate-fade-up flex flex-wrap items-center gap-3" style={{ animationDelay: '0.05s' }}>
+      <div className="flex items-center gap-2">
+        <Calendar className="w-4 h-4 text-muted-foreground" />
+        <Select
+          value={String(days)}
+          onValueChange={(v) => onDaysChange(Number(v))}
         >
-          {PERIOD_OPTIONS.map(({ label, value }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            className="w-[160px] bg-card border-border hover:border-cyan-500/30 transition-colors"
+            aria-label="Period"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {PERIOD_OPTIONS.map(({ label, value }) => (
+              <SelectItem key={value} value={String(value)}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className={styles.filterGroup}>
-        <label htmlFor="status-select" className={styles.label}>
-          Status
-        </label>
-        <select
-          id="status-select"
-          className={styles.select}
+      <div className="flex items-center gap-2">
+        <Filter className="w-4 h-4 text-muted-foreground" />
+        <Select
           value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value)}
-          aria-label="Status"
+          onValueChange={onStatusFilterChange}
         >
-          {STATUS_OPTIONS.map(({ label, value }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            className="w-[140px] bg-card border-border hover:border-cyan-500/30 transition-colors"
+            aria-label="Status"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )
