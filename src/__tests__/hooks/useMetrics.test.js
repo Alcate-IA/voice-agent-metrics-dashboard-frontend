@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
 import { useMetrics } from '../../hooks/useMetrics.js'
 
 vi.mock('../../services/api.js', () => ({
@@ -9,44 +9,33 @@ vi.mock('../../services/api.js', () => ({
 
 import { fetchCurrentMetrics, fetchHistoricalMetrics } from '../../services/api.js'
 
-const mockCurrentMetrics = {
-  data: {
-    current: {
-      total_calls: 100,
-      calls_today: 10,
-      calls_this_week: 50,
-      avg_duration: 120,
-      total_duration: 12000,
-      completed: 80,
-      failed: 10,
-      pending: 10,
-      voice_generation_time: 0.5,
-      call_execution_time: 2.0,
-      cost_per_call: 0.05,
-      total_cost: 5.0,
-      daily_spend: 0.5,
-    },
-    last_update: '2026-03-13T00:00:00Z',
-    status: 'ok',
-  },
+// API functions now return unwrapped data directly (no axios .data wrapper)
+const mockCurrentData = {
+  total_calls: 100,
+  calls_today: 10,
+  calls_this_week: 50,
+  avg_duration: 120,
+  completed: 80,
+  failed: 10,
+  pending: 10,
+  total_cost: 5.0,
+  daily_spend: 0.5,
 }
 
-const mockHistoricalMetrics = {
-  data: {
-    content: [{ id: 1, timestamp: '2026-03-01T00:00:00Z', total_calls: 20 }],
-    total_elements: 1,
-    page: 0,
-    size: 20,
-    total_pages: 1,
-  },
+const mockHistoricalData = {
+  content: [{ id: 1, timestamp: '2026-03-01T00:00:00Z', total_calls: 20 }],
+  total_elements: 1,
+  page: 0,
+  size: 20,
+  total_pages: 1,
 }
 
 describe('useMetrics', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()
-    fetchCurrentMetrics.mockResolvedValue(mockCurrentMetrics)
-    fetchHistoricalMetrics.mockResolvedValue(mockHistoricalMetrics)
+    fetchCurrentMetrics.mockResolvedValue(mockCurrentData)
+    fetchHistoricalMetrics.mockResolvedValue(mockHistoricalData)
   })
 
   afterEach(() => {
@@ -61,7 +50,7 @@ describe('useMetrics', () => {
     })
 
     expect(fetchCurrentMetrics).toHaveBeenCalledWith(1, 7)
-    expect(result.current.currentMetrics).toEqual(mockCurrentMetrics.data)
+    expect(result.current.currentMetrics).toEqual(mockCurrentData)
   })
 
   it('starts with isLoading true and sets it to false after fetch', async () => {
@@ -76,7 +65,7 @@ describe('useMetrics', () => {
     expect(result.current.isLoading).toBe(true)
 
     await act(async () => {
-      resolveMetrics(mockCurrentMetrics)
+      resolveMetrics(mockCurrentData)
       await Promise.resolve()
     })
 
@@ -133,7 +122,7 @@ describe('useMetrics', () => {
     })
 
     expect(fetchHistoricalMetrics).toHaveBeenCalledWith(1, 7, {})
-    expect(result.current.historicalMetrics).toEqual(mockHistoricalMetrics.data)
+    expect(result.current.historicalMetrics).toEqual(mockHistoricalData)
   })
 
   it('fetchHistory passes custom options', async () => {
@@ -170,7 +159,6 @@ describe('useMetrics', () => {
       await Promise.resolve()
     })
 
-    // lastUpdate should be a Date after successful fetch
     expect(result.current.lastUpdate).toBeInstanceOf(Date)
     expect(result.current.connectionLost).toBe(false)
   })

@@ -30,8 +30,8 @@ const defaultMetrics = {
 beforeEach(() => {
   vi.clearAllMocks()
   useMetrics.mockReturnValue(defaultMetrics)
-  api.fetchCustomers.mockResolvedValue({ data: [] })
-  api.fetchAgents.mockResolvedValue({ data: [] })
+  api.fetchCustomers.mockResolvedValue([])
+  api.fetchAgents.mockResolvedValue([])
 })
 
 describe('Dashboard polling integration', () => {
@@ -152,7 +152,7 @@ describe('Dashboard polling integration', () => {
   })
 
   it('mocks fetchCustomers and fetchAgents correctly', async () => {
-    api.fetchCustomers.mockResolvedValue({ data: [{ id: 1, name: 'Test Corp' }] })
+    api.fetchCustomers.mockResolvedValue([{ id: 1, name: 'Test Corp' }])
     render(<Dashboard />)
     await waitFor(() => {
       expect(api.fetchCustomers).toHaveBeenCalledTimes(1)

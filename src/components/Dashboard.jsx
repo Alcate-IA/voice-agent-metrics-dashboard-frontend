@@ -21,7 +21,7 @@ function Dashboard() {
 
   useEffect(() => {
     fetchCustomers()
-      .then((res) => setCustomers(res.data))
+      .then((data) => setCustomers(data || []))
       .catch(() => {})
   }, [])
 
@@ -32,7 +32,7 @@ function Dashboard() {
       return
     }
     fetchAgents(selectedCustomerId)
-      .then((res) => setAgents(res.data))
+      .then((data) => setAgents(data || []))
       .catch(() => setAgents([]))
   }, [selectedCustomerId])
 

@@ -31,8 +31,8 @@ export function useMetrics(customerId, agentId) {
   // them in the dependency array so the effect re-runs (resets the interval)
   // whenever either value changes.
   const pollCallback = useCallback(async () => {
-    const response = await fetchCurrentMetrics(customerId, agentId)
-    setCurrentMetrics(response.data)
+    const data = await fetchCurrentMetrics(customerId, agentId)
+    setCurrentMetrics(data)
   }, [customerId, agentId])
 
   const { isPolling, lastUpdate, consecutiveFailures, connectionLost, error } =
@@ -40,8 +40,8 @@ export function useMetrics(customerId, agentId) {
 
   const fetchHistory = useCallback(
     async (options = {}) => {
-      const response = await fetchHistoricalMetrics(customerId, agentId, options)
-      setHistoricalMetrics(response.data)
+      const data = await fetchHistoricalMetrics(customerId, agentId, options)
+      setHistoricalMetrics(data)
     },
     [customerId, agentId]
   )

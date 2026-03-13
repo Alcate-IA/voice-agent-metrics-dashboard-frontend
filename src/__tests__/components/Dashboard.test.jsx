@@ -41,8 +41,8 @@ describe('Dashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useMetrics.mockReturnValue(defaultMetrics)
-    api.fetchCustomers.mockResolvedValue({ data: mockCustomers })
-    api.fetchAgents.mockResolvedValue({ data: mockAgents })
+    api.fetchCustomers.mockResolvedValue(mockCustomers)
+    api.fetchAgents.mockResolvedValue(mockAgents)
   })
 
   it('renders without crashing', async () => {
