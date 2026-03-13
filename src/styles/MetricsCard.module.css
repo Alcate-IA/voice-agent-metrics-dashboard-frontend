@@ -72,3 +72,16 @@
 .trend.neutral {
   color: #6c757d;
 }
+
+/* =========================================================
+   Value-change pulse animation
+   ========================================================= */
+
+.updated {
+  animation: pulse 1s ease-out;
+}
+
+@keyframes pulse {
+  0% { background-color: #e3f2fd; }
+  100% { background-color: white; }
+}

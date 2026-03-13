@@ -140,6 +140,7 @@ function Dashboard() {
         lastUpdate={lastUpdate}
         isPolling={isLoading}
         connectionLost={connectionLost}
+        consecutiveFailures={consecutiveFailures}
       />
     </div>
   )
